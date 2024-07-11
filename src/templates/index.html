@@ -10,10 +10,12 @@
         const results = Array.from(document.querySelectorAll(".result"));
         for (const result of results) {
           const linkElement = result.querySelector(".link");
+          const faviconElement = result.querySelector(".favicon");
 
           const url = new URL(linkElement.href);
 
           linkElement.href = `/original/${url.host}/${btoa(url.pathname)}`;
+          faviconElement.src = `https://www.google.com/s2/favicons?domain=${url.hostname.split(".").slice(-2).join(".")}&sz=32`;
         }
       });
     </script>
@@ -21,6 +23,7 @@
   <body>
     {% for result in search_results %}
     <div class="result">
+      <img class="favicon" alt="Favicon" />
       <a class="link" href="{{result.url}}">{{result.url}}</a>
       <span class="mime">{{result.mime}}</span>
       <span class="timestamp">{{result.crawledAt}}</span>
