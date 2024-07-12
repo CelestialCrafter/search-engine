@@ -4,18 +4,37 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Search Index</title>
-    <link href="css/style.css" rel="stylesheet" />
+    <style>
+      .image {
+        max-width: 20vw;
+        height: auto;
+      }
+    </style>
     <script>
+      // https://stackoverflow.com/a/30106551/21210614
+      const b64EncodeUnicode = (str) =>
+        btoa(
+          encodeURIComponent(str).replace(
+            /%([0-9A-F]{2})/g,
+            function toSolidBytes(match, p1) {
+              return String.fromCharCode("0x" + p1);
+            },
+          ),
+        );
+
       document.addEventListener("DOMContentLoaded", () => {
         const results = Array.from(document.querySelectorAll(".result"));
         for (const result of results) {
           const linkElement = result.querySelector(".link");
           const faviconElement = result.querySelector(".favicon");
+          const imageElement = result.querySelector(".image");
 
           const url = new URL(linkElement.href);
 
-          linkElement.href = `/original/${url.host}/${btoa(url.pathname)}`;
+          linkElement.href = `/original/${url.host}/${b64EncodeUnicode(decodeURIComponent(url.pathname))}`;
           faviconElement.src = `https://www.google.com/s2/favicons?domain=${url.hostname.split(".").slice(-2).join(".")}&sz=32`;
+
+          if (imageElement) imageElement.src = linkElement.href;
         }
       });
     </script>
@@ -24,9 +43,13 @@
     {% for result in search_results %}
     <div class="result">
       <img class="favicon" alt="Favicon" />
-      <a class="link" href="{{result.url}}">{{result.url}}</a>
       <span class="mime">{{result.mime}}</span>
       <span class="timestamp">{{result.crawledAt}}</span>
+      <a class="link" href="{{result.url}}">
+        {% if result.mime == "image/jpeg" or result.mime == "image/png" %}
+        <img class="image" src="" />
+        {% else %} {{result.url}} {% endif %}
+      </a>
     </div>
     {% endfor %}
   </body>

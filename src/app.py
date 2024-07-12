@@ -1,4 +1,5 @@
 import os
+from urllib.parse import unquote
 
 from flask import Flask, Response, abort, render_template
 from werkzeug.security import safe_join
@@ -22,7 +23,7 @@ def index():
 		for file in files:
 			data = parsePb(os.path.join(root, file))
 			results.append({
-			  'url': data.url,
+			  'url': unquote(data.url),
 			  'crawledAt': data.crawledAt.ToMilliseconds(),
 			  'mime': data.mime,
 			})
