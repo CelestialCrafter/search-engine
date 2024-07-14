@@ -1,3 +1,4 @@
 # search-engine
 
-TBD
+search engine!
+works well with [CelestialCrafter/crawler](https://github.com/CelestialCrafter/crawler)
