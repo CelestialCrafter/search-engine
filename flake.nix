@@ -10,6 +10,7 @@
     {
       devShells.x86_64-linux.default = pkgs.mkShell {
         packages = with pkgs; [
+          nodejs
           protobuf
           (python3.withPackages (py-pkgs: [
             py-pkgs.flask

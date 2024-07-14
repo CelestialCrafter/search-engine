@@ -1,41 +1,37 @@
-import os
-from urllib.parse import unquote
+from base64 import b64decode
+from threading import Thread
 
-from flask import Flask, Response, abort, render_template
-from werkzeug.security import safe_join
+from flask import Flask, Response, abort, send_from_directory
 
-import protos.crawled_pb2 as crawled_pb2
+from .common import parse_pb
+from .options import load_options
+from .preflight import get_search_entries, preflight
 
-dataPath = '../data/'
-app = Flask(__name__)
 
-def parsePb(path):
-	data = crawled_pb2.Crawled()
-	with open(path, 'rb') as f:
-		data.ParseFromString(f.read())
-	return data
+def create_app():
+	options = load_options()
+	preflight_thread = Thread(target=preflight)
+	preflight_thread.start()
 
-@app.route('/')
-def index():
-	results = []
+	app = Flask(__name__)
 
-	for root, _, files in os.walk(dataPath):
-		for file in files:
-			data = parsePb(os.path.join(root, file))
-			results.append({
-			  'url': unquote(data.url),
-			  'crawledAt': data.crawledAt.ToMilliseconds(),
-			  'mime': data.mime,
-			})
+	@app.route('/', defaults={'path': 'index.html'})
+	@app.route("/<path:path>")
+	def frontend(path):
+		return send_from_directory(options["web_path"], path)
 
-	return render_template('index.html', search_results=results)
+	@app.route('/original/<path:url>')
+	def original(url):
+		entries = get_search_entries()
+		if url not in entries:
+			abort(404)
 
-@app.route('/original/<host>/<path>')
-def original(host, path):
-	path = safe_join(dataPath, os.path.join(host, path + '.pb'))
+		entry = entries[url]
+		data = parse_pb(entry["path"])
+		return Response(data.original, mimetype=data.mime)
 
-	if not os.path.isfile(path):
-		abort(404)
+	@app.route('/api/search-results')
+	def searchResults():
+		return list(get_search_entries().values())
 
-	data = parsePb(path)
-	return Response(data.original, mimetype=data.mime)
+	return app
