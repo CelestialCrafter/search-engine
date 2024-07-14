@@ -1,7 +1,6 @@
-from base64 import b64decode
 from threading import Thread
 
-from flask import Flask, Response, abort, send_from_directory
+from flask import Flask, Response, abort, request, send_from_directory
 
 from .common import parse_pb
 from .options import load_options
@@ -15,12 +14,12 @@ def create_app():
 
 	app = Flask(__name__)
 
-	@app.route('/', defaults={'path': 'index.html'})
+	@app.route("/", defaults={"path": "index.html"})
 	@app.route("/<path:path>")
 	def frontend(path):
 		return send_from_directory(options["web_path"], path)
 
-	@app.route('/original/<path:url>')
+	@app.route("/original/<path:url>")
 	def original(url):
 		entries = get_search_entries()
 		if url not in entries:
@@ -30,8 +29,12 @@ def create_app():
 		data = parse_pb(entry["path"])
 		return Response(data.original, mimetype=data.mime)
 
-	@app.route('/api/search-results')
+	@app.route("/api/search-results")
 	def searchResults():
-		return list(get_search_entries().values())
+		offset = request.args.get("offset", default=0, type=int)
+		limit = min(500, request.args.get("limit", default=100, type=int))
+		entries = list(get_search_entries().values())
+
+		return {"total": len(entries), "results": entries[offset:offset + limit]}
 
 	return app
