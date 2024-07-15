@@ -36,11 +36,12 @@ def save():
 def compute(algorithm_data):
 	global search_entries
 
-	for path, data in tqdm(algorithm_data, desc="entries"):
+	for path, data in tqdm(algorithm_data, desc="load entries"):
 		decodedUrl = unquote(data.url)
 		search_entries[decodedUrl] = {
-		  'path': path,
-		  'url': decodedUrl,
-		  'crawledAt': data.crawledAt.ToMilliseconds(),
-		  'mime': data.mime,
+		  "path": path,
+		  "title": data.title,
+		  "url": decodedUrl,
+		  "crawledAt": data.crawledAt.ToMilliseconds(),
+		  "mime": data.mime,
 		}

@@ -12,7 +12,7 @@ def preflight():
 	options = get_options()
 
 	files = []
-	sum = ''
+	sum = ""
 
 	for root, _, walk_files in os.walk(options["search_files_path"]):
 		for file in walk_files:
@@ -25,7 +25,7 @@ def preflight():
 
 	path = os.path.join(options["data_path"], "search-files-hash")
 
-	f = open(path, 'r+')
+	f = open(path, "r+")
 	f.seek(0)
 
 	if sum == f.read():

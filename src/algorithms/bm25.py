@@ -2,7 +2,6 @@ import os
 
 import bm25s
 import Stemmer
-from tqdm import tqdm
 
 from ..options import get_options
 from .entries import get_search_entries
@@ -53,7 +52,7 @@ def compute(algorithm_data):
 	options = get_options()
 	stemmer = Stemmer.Stemmer(options["bm25_stem_lang"])
 
-	for _, data in tqdm(algorithm_data, desc="bm25"):
+	for _, data in algorithm_data:
 		text = data.text.decode(errors="ignore")
 		corpus.append(text)
 

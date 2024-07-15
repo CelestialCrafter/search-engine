@@ -1,11 +1,11 @@
 import os
 from importlib import import_module
+from math import ceil
 
 from flask import Flask, Response, abort, request, send_from_directory
 
 from .algorithms.entries import get_search_entries
 from .algorithms.entries import transform as transform_entries
-from .algorithms.fuzzy import get as fuzzy_get
 from .common import parse_pb
 from .options import load_options
 from .preflight import preflight
@@ -61,6 +61,6 @@ def create_app():
 			entries = query_cache[query_key]
 
 		offset = page_size * (page - 1)
-		return {"total": pages, "results": transform_entries(entries[offset:offset + page_size])}
+		return {"total": ceil(len(entries) / page_size), "results": transform_entries(entries[offset:offset + page_size])}
 
 	return app

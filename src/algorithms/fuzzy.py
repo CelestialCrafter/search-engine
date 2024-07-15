@@ -1,8 +1,6 @@
 from subprocess import PIPE, run
 from urllib.parse import unquote
 
-from tqdm import tqdm
-
 from .entries import get_search_entries
 
 urls = []
@@ -23,6 +21,6 @@ def save():
 def compute(algorithm_data):
 	global urls
 
-	for _, data in tqdm(algorithm_data, desc="entries"):
+	for _, data in algorithm_data:
 		decodedUrl = unquote(data.url)
 		urls.append(decodedUrl)

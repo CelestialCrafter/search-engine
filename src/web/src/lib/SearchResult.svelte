@@ -13,10 +13,10 @@
         <span class="mime">{result.mime}</span>
         <span class="timestamp">{new Date(result.crawledAt).toLocaleString()}</span>
         <div class="links">
-          <a class="server" href={serverUrl}>Server</a>
-          <a class="external" href={result.url}>External</a>
-          <a class="archive" href={archiveUrl}>Archive</a>
-          <a class="default" href={result.url}>
+          <a class="server" href={serverUrl} target="_blank">Server</a>
+          <a class="external" href={result.url} target="_blank">External</a>
+          <a class="archive" href={archiveUrl} target="_blank">Archive</a>
+          <a class="default" href={result.url} target="_blank">
             {result.url}
             {#if result.mime.startsWith("image/")}
               <br /> 
