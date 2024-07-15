@@ -1,0 +1,3 @@
+[submodule "src/protos_raw"]
+	path = src/protos_raw
+	url = https://github.com/celestialCrafter/crawler
