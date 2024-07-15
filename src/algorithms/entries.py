@@ -2,6 +2,8 @@ import os
 import pickle
 from urllib.parse import unquote
 
+from tqdm import tqdm
+
 from ..options import get_options
 
 search_entries = {}
@@ -20,7 +22,7 @@ def load():
 
 	options = get_options()
 
-	with open(os.path.join(options["data_path"], "entries-algorithm.pkl"), "rb") as f:
+	with open(os.path.join(options["data_path"], "entries.pkl"), "rb") as f:
 		search_entries = pickle.load(f)
 
 def save():
@@ -28,16 +30,17 @@ def save():
 
 	options = get_options()
 
-	with open(os.path.join(options["data_path"], "entries-algorithm.pkl"), "wb") as f:
+	with open(os.path.join(options["data_path"], "entries.pkl"), "wb") as f:
 		pickle.dump(search_entries, f)
 
-def compute(path, data):
+def compute(algorithm_data):
 	global search_entries
 
-	decodedUrl = unquote(data.url)
-	search_entries[decodedUrl] = {
-	  'path': path,
-	  'url': decodedUrl,
-	  'crawledAt': data.crawledAt.ToMilliseconds(),
-	  'mime': data.mime,
-	}
+	for path, data in tqdm(algorithm_data, desc="entries"):
+		decodedUrl = unquote(data.url)
+		search_entries[decodedUrl] = {
+		  'path': path,
+		  'url': decodedUrl,
+		  'crawledAt': data.crawledAt.ToMilliseconds(),
+		  'mime': data.mime,
+		}

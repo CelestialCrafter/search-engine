@@ -9,6 +9,8 @@ default = {
   "web_path": "web/dist/",
   "page_size": 100,
   "pages": 10,
+  "bm25_threshold": 0.15,
+  "bm25_stem_lang": "english",
 }
 
 def get_options():

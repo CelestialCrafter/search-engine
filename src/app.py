@@ -1,16 +1,24 @@
-from threading import Thread
+import os
+from importlib import import_module
 
 from flask import Flask, Response, abort, request, send_from_directory
 
+from .algorithms.entries import get_search_entries
+from .algorithms.entries import transform as transform_entries
+from .algorithms.fuzzy import get as fuzzy_get
 from .common import parse_pb
 from .options import load_options
-from .preflight import get_search_entries, preflight
+from .preflight import preflight
 
 
 def create_app():
 	options = load_options()
-	preflight_thread = Thread(target=preflight)
-	preflight_thread.start()
+	os.makedirs(options["data_path"], exist_ok=True)
+
+	# move this to valkey
+	query_cache = {}
+
+	preflight()
 
 	app = Flask(__name__)
 
@@ -23,18 +31,36 @@ def create_app():
 	def original(url):
 		entries = get_search_entries()
 		if url not in entries:
-			abort(404)
+			return abort(404)
 
-		entry = entries[url]
-		data = parse_pb(entry["path"])
+		data = parse_pb(entries[url]["path"])
 		return Response(data.original, mimetype=data.mime)
 
 	@app.route("/api/search-results")
 	def searchResults():
-		offset = request.args.get("offset", default=0, type=int)
-		limit = min(500, request.args.get("limit", default=100, type=int))
-		entries = list(get_search_entries().values())
+		page = request.args.get("page", default=1, type=int)
+		query = request.args.get("query", type=str)
+		algorithm_name = request.args.get("algorithm", type=str)
 
-		return {"total": len(entries), "results": entries[offset:offset + limit]}
+		try:
+			algorithm = import_module(f".algorithms.{algorithm_name}", "src")
+		except ModuleNotFoundError:
+			return abort(400)
+
+		if query is None:
+			return abort(400)
+
+		page_size = options["page_size"]
+		pages = options["pages"]
+
+		query_key = f"{algorithm_name}-{query}"
+		if query_key not in query_cache:
+			entries = algorithm.get(query, pages * page_size)
+			query_cache[query_key] = entries
+		else:
+			entries = query_cache[query_key]
+
+		offset = page_size * (page - 1)
+		return {"total": pages, "results": transform_entries(entries[offset:offset + page_size])}
 
 	return app

@@ -7,6 +7,7 @@ from tqdm import tqdm
 from .common import parse_pb
 from .options import get_options
 
+
 def preflight():
 	options = get_options()
 
@@ -23,6 +24,7 @@ def preflight():
 	sum = sha1(sum.encode()).hexdigest()
 
 	path = os.path.join(options["data_path"], "search-files-hash")
+
 	f = open(path, 'r+')
 	f.seek(0)
 
@@ -31,7 +33,7 @@ def preflight():
 		f.close()
 
 	# @NOTE make sure entries is the 0th element
-	algorithms = ["entries", "fuzzy"]
+	algorithms = ["entries", "fuzzy", "bm25"]
 	algorithm_data = []
 
 	if compute:
@@ -42,8 +44,7 @@ def preflight():
 		algorithm = import_module(f".algorithms.{algorithm_name}", "src")
 
 		if compute:
-			for data in tqdm(algorithm_data, desc=algorithm_name):
-				algorithm.compute(*data)
+			algorithm.compute(algorithm_data)
 			algorithm.save()
 		else:
 			algorithm.load()

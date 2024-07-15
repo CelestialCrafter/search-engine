@@ -17,11 +17,10 @@
           <a class="external" href={result.url}>External</a>
           <a class="archive" href={archiveUrl}>Archive</a>
           <a class="default" href={result.url}>
+            {result.url}
             {#if result.mime.startsWith("image/")}
               <br /> 
               <img class="image" alt="Result" src={serverUrl} />
-            {:else}
-              {result.url}
             {/if}
           </a>
         </div>
