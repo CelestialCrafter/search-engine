@@ -1,8 +1,8 @@
-from .protos import crawled_pb2 as crawled_pb2
+from protos import crawled_pb2 as pb
 
 
 def parse_pb(path):
-	data = crawled_pb2.Crawled()
+	doc = pb.Document()
 	with open(path, "rb") as f:
-		data.ParseFromString(f.read())
-	return data
+		doc.ParseFromString(f.read())
+	return doc

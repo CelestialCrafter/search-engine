@@ -4,11 +4,11 @@ from math import ceil
 
 from flask import Flask, Response, abort, request, send_from_directory
 
-from .algorithms.entries import get_search_entries
-from .algorithms.entries import transform as transform_entries
-from .common import parse_pb
-from .options import load_options
-from .preflight import preflight
+from algorithms.entries import get_search_entries
+from algorithms.entries import transform as transform_entries
+from common import parse_pb
+from options import load_options
+from preflight import preflight
 
 
 def create_app():
@@ -43,7 +43,7 @@ def create_app():
 		algorithm_name = request.args.get("algorithm", type=str)
 
 		try:
-			algorithm = import_module(f".algorithms.{algorithm_name}", "src")
+			algorithm = import_module(f"algorithms.{algorithm_name}")
 		except ModuleNotFoundError:
 			return abort(400)
 
@@ -51,11 +51,11 @@ def create_app():
 			return abort(400)
 
 		page_size = options["page_size"]
-		pages = options["pages"]
+		min_pages = options["min_pages"]
 
 		query_key = f"{algorithm_name}-{query}"
 		if query_key not in query_cache:
-			entries = algorithm.get(query, pages * page_size)
+			entries = algorithm.get(query, min_pages * page_size)
 			query_cache[query_key] = entries
 		else:
 			entries = query_cache[query_key]

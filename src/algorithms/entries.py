@@ -1,10 +1,10 @@
 import os
 import pickle
-from urllib.parse import unquote
 
 from tqdm import tqdm
 
-from ..options import get_options
+from options import get_options
+from protos import crawled_pb2 as crawled_pb2
 
 search_entries = {}
 
@@ -14,7 +14,7 @@ def get_search_entries():
 
 def transform(urls):
 	filtered = filter(lambda url: url in search_entries, urls)
-	mapped = map(lambda url: search_entries[url], filtered)
+	mapped = map(lambda url: str(search_entries[url]), filtered)
 	return list(mapped)
 
 def load():
@@ -36,12 +36,9 @@ def save():
 def compute(algorithm_data):
 	global search_entries
 
-	for path, data in tqdm(algorithm_data, desc="load entries"):
-		decodedUrl = unquote(data.url)
-		search_entries[decodedUrl] = {
-		  "path": path,
-		  "title": data.title,
-		  "url": decodedUrl,
-		  "crawledAt": data.crawledAt.ToMilliseconds(),
-		  "mime": data.mime,
-		}
+	for _, data in tqdm(algorithm_data, desc="load entries"):
+		data.ClearField("children")
+		data.ClearField("text")
+		data.ClearField("original")
+
+		search_entries[data.url] = data.SerializeToString()

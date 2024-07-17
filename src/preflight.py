@@ -4,8 +4,8 @@ from importlib import import_module
 
 from tqdm import tqdm
 
-from .common import parse_pb
-from .options import get_options
+from common import parse_pb
+from options import get_options
 
 
 def preflight():
@@ -25,6 +25,8 @@ def preflight():
 
 	path = os.path.join(options["data_path"], "search-files-hash")
 
+	if not os.path.exists(path):
+		open(path, "x").close()
 	f = open(path, "r+")
 	f.seek(0)
 
@@ -37,11 +39,11 @@ def preflight():
 	algorithm_data = []
 
 	if compute:
-		for path in tqdm(files, desc="parse-pb"):
+		for path in tqdm(files, desc="parse pb"):
 			algorithm_data.append((path, parse_pb(path)))
 
 	for algorithm_name in algorithms:
-		algorithm = import_module(f".algorithms.{algorithm_name}", "src")
+		algorithm = import_module(f"algorithms.{algorithm_name}")
 
 		if compute:
 			algorithm.compute(algorithm_data)

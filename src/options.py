@@ -1,6 +1,6 @@
 import tomllib
 
-options_path = "options.toml"
+options_path = "../options.toml"
 
 options = {}
 default = {
@@ -8,7 +8,7 @@ default = {
   "data_path": "data/",
   "web_path": "web/dist/",
   "page_size": 100,
-  "pages": 10,
+  "min_pages": 10,
   "bm25_threshold": 0.15,
   "bm25_stem_lang": "english",
 }
