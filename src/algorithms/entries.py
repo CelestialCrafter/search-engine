@@ -14,7 +14,7 @@ def get_search_entries():
 
 def transform(urls):
 	filtered = filter(lambda url: url in search_entries, urls)
-	mapped = map(lambda url: str(search_entries[url]), filtered)
+	mapped = map(lambda url: search_entries[url].decode(), filtered)
 	return list(mapped)
 
 def load():
