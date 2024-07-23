@@ -1,0 +1,11 @@
+<ul id="results">
+  {% for result in results %}
+  <li>
+    <h2>{{result.title}}</h2>
+    <a href="{{result.url}}">{{result.url}}</a>
+    <pre>{{result.crawled_at}}</pre>
+    <span>{{result.description}}</span>
+    <span>{{result.site}}</span>
+  </li>
+  {% endfor %}
+</ul>

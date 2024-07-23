@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block head %}
+<title>Search</title>
+{% endblock %}
+
+{% block content %}
+<form
+  hx-get="/search/results"
+  hx-trigger="change delay:200ms"
+  hx-target="#search"
+  hx-swap="innerHTML"
+  hx-boost="true"
+ >
+<input
+type="text"
+placeholder="Search..."
+name="query"
+/>
+<select name="algorithm">
+{% for algorithm in algorithms %}
+<option value="{{algorithm}}">{{algorithm}}</option>
+{% endfor %}
+</select>
+</form>
+
+<div id="search">
+<ul id="pages">
+<input type="hidden" name="page" value="1" />
+</ul>
+</div>
+{% endblock %}

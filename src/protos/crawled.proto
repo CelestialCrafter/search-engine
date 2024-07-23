@@ -15,7 +15,7 @@ message Metadata
 
 message Document
 {
-  string url = 1;
+  optional string url = 1;
   repeated string children = 2;
   bytes original = 3;
   optional bytes text = 4;
