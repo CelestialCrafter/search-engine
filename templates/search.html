@@ -6,12 +6,14 @@
 
 {% block content %}
 <form
+  id="search-form"
   hx-get="/search/results"
-  hx-trigger="change delay:200ms"
+  hx-trigger="keyup changed from:[name='query'] delay:200ms, change"
   hx-target="#search"
   hx-swap="innerHTML"
   hx-boost="true"
- >
+  hx-include="[name='page']"
+>
 <input
 type="text"
 placeholder="Search..."
@@ -24,9 +26,7 @@ name="query"
 </select>
 </form>
 
-<div id="search">
-<ul id="pages">
-<input type="hidden" name="page" value="1" />
-</ul>
+<div id="search" >
+<input type="number" name="page" value="1" min="1" max="1" />
 </div>
 {% endblock %}
