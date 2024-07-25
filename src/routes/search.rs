@@ -1,5 +1,6 @@
 use crate::options::OPTIONS;
 use askama::Template;
+use eyre::Result;
 use serde::Deserialize;
 use warp::{
     reject::Rejection,
@@ -7,13 +8,13 @@ use warp::{
 };
 
 use crate::{
-    algorithms::{entries::StrippedDocument, SearchAlgorithmType},
+    algorithms::{entries::StrippedDocument, SearchAlgorithmType, SearchResponseAmount},
     errors, ALGORITHMS, ENTRIES,
 };
 
 #[derive(Deserialize)]
 pub struct SearchResultsQuery {
-    page: u16,
+    page: Option<u16>,
     query: String,
     algorithm: SearchAlgorithmType,
 }
@@ -28,28 +29,44 @@ struct SearchTemplate<'a> {
 #[template(path = "search-results.html")]
 struct SearchResultTemplate<'a> {
     pages: u16,
+    page: u16,
     results: Vec<&'a StrippedDocument>,
 }
 
-pub async fn results(query: SearchResultsQuery) -> Result<impl Reply, Rejection> {
+fn fetch_algorithm_results(query: &SearchResultsQuery) -> Result<Vec<String>, Rejection> {
     let algorithms = ALGORITHMS.get().expect("algorithms cell should be full");
-    let entries_algorithm = ENTRIES.get().expect("entries cell should be full");
-
-    let results = algorithms
+    algorithms
         .get(&query.algorithm)
         .ok_or(warp::reject::custom(errors::IncorrectParameters))?
         .search(
             &query.query,
-            (OPTIONS.pages as u64) * OPTIONS.page_size as u64,
+            OPTIONS.pages as SearchResponseAmount * OPTIONS.page_size as SearchResponseAmount,
         )
-        .or_else(|error| Err(warp::reject::custom(errors::Failed(error))))?;
+        .or_else(|error| Err(warp::reject::custom(errors::Failed(error))))
+}
 
-    let offset = OPTIONS.page_size * (query.page as u32 - 1);
-    let end = (offset + OPTIONS.page_size).min(results.len() as u32) as usize;
-    let pages = ((results.len() as f32 / OPTIONS.page_size as f32).ceil() as u16).max(1);
-    let results = entries_algorithm.transform(results[offset as usize..end].to_vec());
+pub async fn results(query: SearchResultsQuery) -> Result<impl Reply, Rejection> {
+    let entries_algorithm = ENTRIES.get().expect("entries cell should be full");
+    let results = fetch_algorithm_results(&query)?;
 
-    let template = SearchResultTemplate { pages, results };
+    let page = query.page.unwrap_or(1).max(1);
+    let offset = (OPTIONS.page_size * (page as u32 - 1)) as usize;
+    let end: usize;
+    let pages = ((results.len() as u32 / OPTIONS.page_size) as u16).max(1);
+
+    if query.page.is_some() {
+        end = (offset + OPTIONS.page_size as usize).min(results.len());
+    } else {
+        end = results.len();
+    }
+
+    let results = entries_algorithm.transform(results[offset..end].to_vec());
+
+    let template = SearchResultTemplate {
+        page: query.page.unwrap_or(0),
+        pages,
+        results,
+    };
 
     let rendered = template
         .render()

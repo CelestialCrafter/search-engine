@@ -5,10 +5,11 @@ use std::{
     io::{Read, Write},
     process::{Command, Stdio},
 };
+use tracing::warn;
 
 use crate::{crawled::Document, options::OPTIONS};
 
-use super::{SearchAlgorithm, SearchResponse};
+use super::SearchAlgorithm;
 
 const SAVE_FILE: &str = "fuzzy.bin";
 
@@ -24,7 +25,7 @@ impl Fuzzy {
 }
 
 impl SearchAlgorithm for Fuzzy {
-    fn search(&self, query: &str, max: super::SeachResponseAmount) -> Result<Vec<SearchResponse>> {
+    fn search(&self, query: &str, max: super::SearchResponseAmount) -> Result<Vec<String>> {
         let mut child = Command::new("fzy")
             .args(["-e", &query.to_lowercase(), "-l", &max.to_string()])
             .stdin(Stdio::piped())
@@ -39,7 +40,11 @@ impl SearchAlgorithm for Fuzzy {
         stdin.flush()?;
         drop(stdin);
 
+        let amount = self.urls.len();
+        warn!(amount = ?amount, "pushed to stdin");
+
         child.wait()?;
+        warn!("exited");
 
         let mut stdout = child.stdout.take().ok_or(eyre!("could not take stdout"))?;
         let mut output = "".to_string();

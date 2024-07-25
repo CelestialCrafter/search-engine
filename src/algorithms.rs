@@ -21,8 +21,7 @@ pub mod bm25l;
 pub mod entries;
 pub mod fuzzy;
 
-type SearchResponse = String;
-type SeachResponseAmount = u64;
+pub type SearchResponseAmount = u64;
 
 #[derive(Eq, Hash, PartialEq, Debug, Deserialize, Copy, Clone)]
 pub enum SearchAlgorithmType {
@@ -46,7 +45,7 @@ impl From<SearchAlgorithmType> for Box<dyn SearchAlgorithm> {
 }
 
 pub trait SearchAlgorithm: Sync + Send {
-    fn search(&self, query: &str, max: SeachResponseAmount) -> Result<Vec<SearchResponse>>;
+    fn search(&self, query: &str, max: SearchResponseAmount) -> Result<Vec<String>>;
     fn compute(&mut self, documents: Vec<Document>) -> Result<()>;
     fn save(&self) -> Result<()>;
     fn load(&mut self) -> Result<()>;

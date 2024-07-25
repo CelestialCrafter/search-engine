@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{crawled::Document, options::OPTIONS};
 
-use super::SearchAlgorithm;
+use super::{SearchAlgorithm, SearchResponseAmount};
 
 const SAVE_FILE: &str = "bm25l.bin";
 
@@ -53,11 +53,7 @@ impl BM25L {
 }
 
 impl SearchAlgorithm for BM25L {
-    fn search(
-        &self,
-        query: &str,
-        max: super::SeachResponseAmount,
-    ) -> eyre::Result<Vec<super::SearchResponse>> {
+    fn search(&self, query: &str, max: SearchResponseAmount) -> eyre::Result<Vec<String>> {
         let query_tokens = query.split_whitespace().map(|token| token.to_lowercase());
         let mut document_scores: Vec<f32> = vec![0.0; self.urls.len()];
 

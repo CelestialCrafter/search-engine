@@ -1,12 +1,28 @@
-<input type="number" name="page" value="1" min="1" max="{{pages}}" />
-<ul id="results">
-  {% for result in results %}
-  <li>
-    <h2>{{result.title}}</h2>
-    <a href="{{result.url}}">{{result.url}}</a>
-    <pre>{{result.crawled_at}}</pre>
-    <span>{{result.description}}</span>
-    <span>{{result.site}}</span>
-  </li>
-  {% endfor %}
-</ul>
+{% for result in results %}
+<li>
+  <h2>{{result.title}}</h2>
+  <a href="{{result.url}}">{{result.url}}</a>
+  {% if result.mime.contains("image") %}
+  <img src="{{result.url}}" alt="{{result.description}}" />
+  {% endif %}
+  <pre>{{result.crawled_at}}</pre>
+  <span>{{result.description}}</span>
+  <span>{{result.site}}</span>
+  <span>{{result.mime}}</span>
+</li>
+{% endfor %} {% if page != 0 && page < pages %} {% let next_page = page + 1 %}
+<div
+  hx-get="/search/results?page={{next_page}}"
+  hx-include="#search-form"
+  hx-trigger="revealed"
+  hx-swap="beforeend"
+  hx-target="#results"
+  hx-indicator="this"
+  hx-sync=".result-loader:queue first"
+  class="htmx-indicator result-loader"
+>
+  Loading...
+</div>
+{% else %}
+<span>No More Results</span>
+{% endif %}

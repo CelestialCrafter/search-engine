@@ -13,6 +13,7 @@ pub struct StrippedDocument {
     pub description: String,
     pub title: String,
     pub site: String,
+    pub mime: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -50,6 +51,7 @@ impl Entries {
                     description: metadata.description.unwrap_or("".to_string()),
                     title: metadata.title.unwrap_or("".to_string()),
                     site: metadata.site.unwrap_or("".to_string()),
+                    mime: metadata.mime,
                 },
             );
 
